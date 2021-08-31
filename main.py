@@ -8,11 +8,15 @@ import random
 from globals import *
 from displayshift import CaesarShiftDisplay, HangmanSpace
 from healthbar import Lives
+from asteroid import Asteroid
 # pygame initialization
 pygame.init()
 
 # framework
-scale = 2
+scale = 1
+game_level = 1
+playershot = 1
+score = {0}
 size = (375 * scale, 667 * scale)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Chinchilla")
@@ -53,6 +57,7 @@ class Bullet(pygame.sprite.Sprite):
 
 #group initialization
 BulletList = pygame.sprite.Group()
+AsteroidList = pygame.sprite.Group()
 SpriteList = pygame.sprite.Group()
 
 player = Ship()
@@ -97,7 +102,9 @@ clock = pygame.time.Clock()
 
 # ~~~~ Game loop initialization ~~~~
 gameRunning = True
-
+new_asteroid = Asteroid(game_level, word[random.randint(0, len(word)-1)])
+AsteroidList.add(new_asteroid)
+SpriteList.add(new_asteroid)
 # ------------- Main program ---------------
 while gameRunning:
     for event in pygame.event.get():
@@ -130,6 +137,24 @@ while gameRunning:
                 player_y_speed = 0
             elif event.key == pygame.K_DOWN:
                 player_y_speed = 0
+    if random.randint(0, 100) == 0:
+        new_asteroid = Asteroid(game_level, word[random.randint(0, len(word)-1)])
+        AsteroidList.add(new_asteroid)
+        SpriteList.add(new_asteroid)
+
+    ast_list = AsteroidList.sprites()
+    num_asteroids = len(ast_list)
+    i = 0
+    while i < num_asteroids:
+        if ast_list[i].collide(player.rect.x, player.rect.y):
+            healthbar.lose_life()
+            ast_list[i].kill()
+        i += 1
+    pygame.sprite.groupcollide(AsteroidList, BulletList, True, True)
+
+
+
+
 
     # play area
     play_area = pygame.image.load("space.jpg")
